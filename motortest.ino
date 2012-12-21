@@ -1,59 +1,112 @@
-// LEFT TREAD MOTOR 2
-// RIGHT TREAD MOTOR 1
-// HEAD MOTOR 3
-// US TRIG 28
-// US TRIP 29
-
-
 #include <AFMotor.h>
 
-AF_DCMotor neckMotor(3, MOTOR12_64KHZ);
-AF_DCMotor motor(2, MOTOR12_64KHZ); // create motor #2, 64KHz pwm
-AF_DCMotor motor2(1, MOTOR12_64KHZ);
+// right tread constants
+#define MOTOR_TREAD_RIGHT 1
+#define MOTOR_TREAD_RIGHT_FREQ MOTOR12_64KHZ
+#define MOTOR_TREAD_RIGHT_SPEED 255
+
+// left tread constants
+#define MOTOR_TREAD_LEFT 2
+#define MOTOR_TREAD_LEFT_FREQ MOTOR12_64KHZ
+#define MOTOR_TREAD_LEFT_SPEED 255
+
+// ultrasonic (US) distance finder constants
+#define MOTOR_US 3
+#define MOTOR_US_FREQ MOTOR12_64KHZ
+#define MOTOR_US_SPEED 255
+#define PIN_US_TRIG 28
+#define PIN_US_ECHO 29
+
+
+AF_DCMotor motorTreadRight(MOTOR_TREAD_RIGHT, MOTOR_TREAD_RIGHT_FREQ);
+AF_DCMotor motorTreadLeft(MOTOR_TREAD_LEFT, MOTOR_TREAD_LEFT_FREQ);
+AF_DCMotor motorUS(MOTOR_US, MOTOR12_64KHZ);
+ 
 
 void setup() {
-  Serial.begin(9600);           // set up Serial library at 9600 bps
-  Serial.println("Motor test!");
+  //Serial.begin(9600);
   
-  motor.setSpeed(255);     // set the speed to 200/255
-  motor2.setSpeed(255);
-  neckMotor.setSpeed(255);
+  //Serial.println("SETUP CONFIGURATION");
+  
+  motorTreadRight.setSpeed(MOTOR_TREAD_RIGHT_SPEED);
+  motorTreadLeft.setSpeed(MOTOR_TREAD_LEFT_SPEED);
+  motorUS.setSpeed(MOTOR_US_SPEED);
 }
 
-void loop() {
-  Serial.print("tick");
-  
-  neckMotor.run(FORWARD);
-  motor.run(FORWARD);
-  motor2.run(FORWARD);
-  delay(2000);
-  neckMotor.run(RELEASE);
-  motor.run(RELEASE);
-  motor2.run(RELEASE);
-  delay(2000);
-  neckMotor.run(BACKWARD);
-  motor.run(BACKWARD);
-  motor2.run(BACKWARD);
-  delay(2000);  
-  neckMotor.run(RELEASE);
-  motor.run(RELEASE);
-  motor2.run(RELEASE);
-  delay(2000);
-  
-  ///motor.run(FORWARD);      // turn it on going forward
-  //delay(2000);
-  //motor.run(BACKWARD);   // turn it on going forward
-  //delay(2000);
-  
-  //motor.run(RELEASE);
-  //motor2.run(FORWARD);
-//fs  delay(1000);
+void driveForward(int timeLength) {
+	motorTreadRight.run(FORWARD);
+	motorTreadLeft.run(FORWARD);
+	
+	delay(timeLength);
+	
+	motorTreadRight.run(RELEASE);
+	motorTreadLeft.run(RELEASE);
+}
 
-  Serial.print("tock");
-  //motor.run(BACKWARD);     // the other way
- // delay(1000);
-  
-  //Serial.print("tack");
-  //motor.run(RELEASE);      // stopped
-  //delay(1000);
+void driveBackward(int timeLength) {
+	motorTreadRight.run(BACKWARD);
+	motorTreadLeft.run(BACKWARD);
+	
+	delay(timeLength);
+	
+	motorTreadRight.run(RELEASE);
+	motorTreadLeft.run(RELEASE);
+}
+
+void driveRotateRight(int timeLength) {
+	motorTreadRight.run(BACKWARD);
+	motorTreadLeft.run(FORWARD);
+	
+	delay(timeLength);
+	
+	motorTreadRight.run(RELEASE);
+	motorTreadLeft.run(RELEASE);
+}
+
+void driveRotateLeft(int timeLength) {
+	motorTreadRight.run(FORWARD);
+	motorTreadLeft.run(BACKWARD);
+	
+	delay(timeLength);
+	
+	motorTreadRight.run(RELEASE);
+	motorTreadLeft.run(RELEASE);
+}
+
+void driveSnakeRightForward(int timeLength) {
+	motorTreadRight.run(FORWARD);
+	
+	delay(timeLength);
+	
+	motorTreadRight.run(RELEASE);
+}
+
+void driveSnakeLeftForward(int timeLength) {
+	motorTreadLeft.run(BACKWARD);
+	
+	delay(timeLength);
+	
+	motorTreadLeft.run(RELEASE);
+}
+
+void driveSnakeRightBackward(int timeLength) {
+	motorTreadRight.run(BACKWARD);
+	
+	delay(timeLength);
+	
+	motorTreadRight.run(RELEASE);
+}
+
+void driveSnakeLeftBackward(int timeLength) {
+	motorTreadLeft.run(BACKWARD);
+	
+	delay(timeLength);
+	
+	motorTreadLeft.run(RELEASE);
+}
+
+
+
+void loop() {
+
 }
