@@ -73,7 +73,7 @@ void driveRotateLeft(int timeLength) {
 	motorTreadLeft.run(RELEASE);
 }
 
-void driveSnakeRightForward(int timeLength) {
+void driveForwardRight(int timeLength) {
 	motorTreadRight.run(FORWARD);
 	
 	delay(timeLength);
@@ -81,7 +81,7 @@ void driveSnakeRightForward(int timeLength) {
 	motorTreadRight.run(RELEASE);
 }
 
-void driveSnakeLeftForward(int timeLength) {
+void driveForwardLeft(int timeLength) {
 	motorTreadLeft.run(BACKWARD);
 	
 	delay(timeLength);
@@ -89,7 +89,7 @@ void driveSnakeLeftForward(int timeLength) {
 	motorTreadLeft.run(RELEASE);
 }
 
-void driveSnakeRightBackward(int timeLength) {
+void driveBackwardRight(int timeLength) {
 	motorTreadRight.run(BACKWARD);
 	
 	delay(timeLength);
@@ -97,7 +97,7 @@ void driveSnakeRightBackward(int timeLength) {
 	motorTreadRight.run(RELEASE);
 }
 
-void driveSnakeLeftBackward(int timeLength) {
+void driveBackwardLeft(int timeLength) {
 	motorTreadLeft.run(BACKWARD);
 	
 	delay(timeLength);
