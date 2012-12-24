@@ -1,6 +1,11 @@
-#include <Esplora.h>
-
+//#include <Esplora.h>
 #include <AFMotor.h>
+
+
+// movement limitations
+#define FORWARD_HALT_DISTANCE 10
+
+
 
 // right tread constants
 #define MOTOR_TREAD_RIGHT 1
@@ -47,27 +52,40 @@
 #define b3 4049  //247hz
 #define d4 3401  //294
 
-#define  c     3830    // 261 Hz
-#define  d     3400    // 294 Hz 
-#define  e     3038    // 329 Hz 
-#define  f     2864    // 349 Hz 
-#define  g     2550    // 392 Hz 
-#define  a     2272    // 440 Hz 
-#define  b     2028    // 493 Hz 
-#define  C     1912    // 523 Hz 
+
+//#define c 3830    // 261 Hz  //this has been commented out because it throws compilation errors.
+#define d 3400    // 294 Hz 
+#define e 3038    // 329 Hz 
+#define f 2864    // 349 Hz 
+#define g 2550    // 392 Hz 
+#define a 2272    // 440 Hz 
+#define b 2028    // 493 Hz 
+#define C 1912    // 523 Hz 
 
 
 
 
 
 // Define a special note, 'R', to represent a rest
-#define  R     0
+#define R 0
+
+
+
+
+
 
 AF_DCMotor motorTreadRight(MOTOR_TREAD_RIGHT, MOTOR_TREAD_RIGHT_FREQ);
 AF_DCMotor motorTreadLeft(MOTOR_TREAD_LEFT, MOTOR_TREAD_LEFT_FREQ);
 AF_DCMotor motorUS(MOTOR_US, MOTOR_US_FREQ);
 AF_DCMotor motorArmBass(MOTOR_ARM_BASS, MOTOR_ARM_BASS_FREQ);
 
+
+float distanceLeft = 0;
+float distanceForward = 0;
+float distanceRight = 0;
+
+bool isDriveForward = false;
+bool canDriveForward = false;
 
 
 const int speakerOut = 24;
@@ -103,6 +121,12 @@ void setup() {
 
   //motorBass.setSpeed(255);
 
+  // motor drive with flagging
+  isDriveForward = false;
+  canDriveForward = false;
+  // end motor drive flagging
+  
+  
   motorTreadRight.setSpeed(MOTOR_TREAD_RIGHT_SPEED);
   motorTreadLeft.setSpeed(MOTOR_TREAD_LEFT_SPEED);
   motorUS.setSpeed(MOTOR_US_SPEED);
@@ -121,6 +145,23 @@ void driveForward(int timeLength) {
   motorTreadRight.run(RELEASE);
   motorTreadLeft.run(RELEASE);
 }
+
+// motor drive with flagging
+void driveForwardBegin()
+{
+	motorTreadRight.run(FORWARD);
+	motorTreadLeft.run(FORWARD);
+}
+
+void driveHalt()
+{
+	motorTreadRight.run(RELEASE);
+	motorTreadLeft.run(RELEASE);
+	
+	isDriveForward = false;
+	canDriveForward = false;
+}
+// end motor drive with flagging
 
 void driveBackward(int timeLength) {
   motorTreadRight.run(BACKWARD);
@@ -320,6 +361,13 @@ void playBass()
   motorArmBass.run(RELEASE); 
 }
 
+void setUSDistances() 
+{
+	distanceForward = getUSDistance();
+	distanceLeft = getUSDistanceLeft();
+	distanceRight = getUSDistanceRight();
+}
+
 float getUSDistance() {
   digitalWrite(PIN_US_TRIG, LOW);
   delayMicroseconds(2);
@@ -351,6 +399,7 @@ float getUSDistanceLeft() {
   
   return distance;
 }
+
 
 void playAJingle() {
   startRecordAsync();
@@ -386,14 +435,56 @@ void playAJingle() {
     
 }
 
+
+
 void loop() {
-  float distanceLeft = 0;
-  float distanceForward = 0;
-  float distanceRight = 0;
   
-  distanceForward = getUSDistance();
-  distanceLeft = getUSDistanceLeft();
-  distanceRight = getUSDistanceRight();
+  if (!isDriveForward && canDriveForward) 
+  {
+	driveForwardBegin();
+  }
+  else if (isDriveForward && canDriveForward && getUSDistance() <= FORWARD_HALT_DISTANCE)
+ {
+        driveHalt();
+  }
+  else if (isDriveForward &! canDriveForward)
+  {
+	driveHalt();
+  }
+  else if (!isDriveForward &! canDriveForward)
+  {	
+		distanceForward = getUSDistance();
+		
+		if (distanceForward > FORWARD_HALT_DISTANCE)
+		{
+			driveForwardBegin();
+		}
+		else
+		{
+			distanceLeft = getUSDistanceLeft();
+			distanceRight = getUSDistanceRight();
+			
+			// do one more pass if distance measurement failed
+			if (distanceLeft <= 0) distanceLeft = getUSDistanceLeft();
+			if (distanceRight <= 0) distanceRight = getUSDistanceRight();
+			
+			if (distanceLeft <= 0 && distanceRight <= 0)
+			{
+				driveBackward(4000);
+			}
+			else if (distanceLeft != 0 && distanceLeft > distanceRight)
+			{
+				driveRotateLeft(1400);
+			}
+			else if (distanceRight != 0 && distanceRight > distanceLeft)
+			{
+				driveRotateRight(1400);
+			}
+		}
+  }
+  
+/*  
+  
   
   Serial.print("L: ");
   Serial.println(distanceLeft);
@@ -419,5 +510,7 @@ void loop() {
        driveRotateRight(1400);
     }
  }
+ */
 }
+
 
